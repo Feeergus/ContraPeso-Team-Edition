@@ -109,6 +109,33 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResizeSmall"",
+                    ""type"": ""Button"",
+                    ""id"": ""7b012902-c867-40c4-9a7b-6eb9250c53ed"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResizeLarge"",
+                    ""type"": ""Button"",
+                    ""id"": ""e900b6f8-0e2e-442a-8abe-1a3aa0a54113"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResizeNormal"",
+                    ""type"": ""Button"",
+                    ""id"": ""b40c0919-fd6c-4038-b339-d63767d46fa5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -177,6 +204,39 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9540aac9-80b3-4084-b49d-e60223109ce9"",
+                    ""path"": ""<Keyboard>/j"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResizeSmall"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8e6ab536-b45f-4b39-854f-8ff6e8f6b58a"",
+                    ""path"": ""<Keyboard>/l"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResizeLarge"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fa1dd70d-b468-4532-b76f-eb96eb558137"",
+                    ""path"": ""<Keyboard>/k"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResizeNormal"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -187,6 +247,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
+        m_Player_ResizeSmall = m_Player.FindAction("ResizeSmall", throwIfNotFound: true);
+        m_Player_ResizeLarge = m_Player.FindAction("ResizeLarge", throwIfNotFound: true);
+        m_Player_ResizeNormal = m_Player.FindAction("ResizeNormal", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
@@ -269,6 +332,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Jump;
+    private readonly InputAction m_Player_ResizeSmall;
+    private readonly InputAction m_Player_ResizeLarge;
+    private readonly InputAction m_Player_ResizeNormal;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -288,6 +354,18 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Jump".
         /// </summary>
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ResizeSmall".
+        /// </summary>
+        public InputAction @ResizeSmall => m_Wrapper.m_Player_ResizeSmall;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ResizeLarge".
+        /// </summary>
+        public InputAction @ResizeLarge => m_Wrapper.m_Player_ResizeLarge;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ResizeNormal".
+        /// </summary>
+        public InputAction @ResizeNormal => m_Wrapper.m_Player_ResizeNormal;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -320,6 +398,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @ResizeSmall.started += instance.OnResizeSmall;
+            @ResizeSmall.performed += instance.OnResizeSmall;
+            @ResizeSmall.canceled += instance.OnResizeSmall;
+            @ResizeLarge.started += instance.OnResizeLarge;
+            @ResizeLarge.performed += instance.OnResizeLarge;
+            @ResizeLarge.canceled += instance.OnResizeLarge;
+            @ResizeNormal.started += instance.OnResizeNormal;
+            @ResizeNormal.performed += instance.OnResizeNormal;
+            @ResizeNormal.canceled += instance.OnResizeNormal;
         }
 
         /// <summary>
@@ -337,6 +424,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @ResizeSmall.started -= instance.OnResizeSmall;
+            @ResizeSmall.performed -= instance.OnResizeSmall;
+            @ResizeSmall.canceled -= instance.OnResizeSmall;
+            @ResizeLarge.started -= instance.OnResizeLarge;
+            @ResizeLarge.performed -= instance.OnResizeLarge;
+            @ResizeLarge.canceled -= instance.OnResizeLarge;
+            @ResizeNormal.started -= instance.OnResizeNormal;
+            @ResizeNormal.performed -= instance.OnResizeNormal;
+            @ResizeNormal.canceled -= instance.OnResizeNormal;
         }
 
         /// <summary>
@@ -391,5 +487,26 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJump(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ResizeSmall" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnResizeSmall(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ResizeLarge" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnResizeLarge(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ResizeNormal" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnResizeNormal(InputAction.CallbackContext context);
     }
 }

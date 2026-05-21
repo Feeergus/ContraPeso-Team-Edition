@@ -6,48 +6,124 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private Transform target;
 
     [Header("Offset")]
-    [SerializeField] private float distance = 6f;
-    [SerializeField] private float height = 2f;
+    [SerializeField] private Vector3 offset = new Vector3(0f, 2f, -6f);
 
-    [Header("Smooth")]
-    [SerializeField] private float positionSmoothTime = 0.15f;
-    [SerializeField] private float rotationSmoothSpeed = 5f;
+    [Header("Follow Settings")]
+    [SerializeField] private float smoothTime = 0.05f;
+    [SerializeField] private float maxSpeed = 100f;
 
-    private Vector3 currentVelocity;
+    [Header("Snap Distance")]
+    [SerializeField] private float snapDistance = 2f;
+
+    [Header("Shake")]
+    [SerializeField] private float maxShake = 1.5f;
+
+    [Header("Landing Shake (DEBUG)")]
+    [SerializeField] private bool enableLandingShake = true;
+    [SerializeField] private float landingShakeThreshold = -8f; // velocidad mínima para considerar caída
+    [SerializeField] private float landingShakeMagnitude = 0.8f;
+    [SerializeField] private float landingShakeDuration = 0.15f;
+
+    private Vector3 velocity;
+
+    // SHAKE
+    private float shakeTimer;
+    private float shakeDuration;
+    private float shakeMagnitude;
+    private Vector3 shakeOffset;
+
+    // LANDING DETECTION
+    private Rigidbody targetRb;
+    private bool wasFalling;
+
+    void Start()
+    {
+        if (target != null)
+            targetRb = target.GetComponent<Rigidbody>();
+    }
 
     void LateUpdate()
     {
         if (target == null) return;
 
-        // 🎯 Solo usamos la rotación Y del player
-        float targetYaw = target.eulerAngles.y;
-        Quaternion targetRotation = Quaternion.Euler(0f, targetYaw, 0f);
+        Vector3 targetPos = target.position;
+        Vector3 desiredPosition = targetPos + offset;
 
-        // 📍 Offset detrás del jugador
-        Vector3 offset = targetRotation * new Vector3(0f, 0f, -distance);
-        offset += Vector3.up * height;
+        float distance = Vector3.Distance(transform.position, desiredPosition);
 
-        Vector3 desiredPosition = target.position + offset;
+        if (distance > snapDistance)
+        {
+            transform.position = desiredPosition;
+            velocity = Vector3.zero;
+        }
+        else
+        {
+            transform.position = Vector3.SmoothDamp(
+                transform.position,
+                desiredPosition,
+                ref velocity,
+                smoothTime,
+                maxSpeed
+            );
+        }
 
-        // 🎥 Movimiento suave
-        transform.position = Vector3.SmoothDamp(
-            transform.position,
-            desiredPosition,
-            ref currentVelocity,
-            positionSmoothTime
-        );
+        // ===== LANDING SHAKE =====
+        DetectLanding();
 
-        // 🔄 Rotación suave mirando al jugador
-        Vector3 lookTarget = target.position + Vector3.up * 1.2f;
+        // ===== SHAKE =====
+        UpdateShake(Time.unscaledDeltaTime);
 
-        Quaternion lookRotation = Quaternion.LookRotation(
-            lookTarget - transform.position
-        );
+        transform.position += shakeOffset;
+    }
 
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            lookRotation,
-            rotationSmoothSpeed * Time.deltaTime
-        );
+    // ===== DETECTAR ATERRIZAJE =====
+    void DetectLanding()
+    {
+        if (!enableLandingShake || targetRb == null) return;
+
+        float verticalVel = targetRb.linearVelocity.y;
+
+        // estaba cayendo
+        if (verticalVel < landingShakeThreshold)
+        {
+            wasFalling = true;
+        }
+
+        // aterrizó (velocidad cercana a 0 después de caer)
+        if (wasFalling && Mathf.Abs(verticalVel) < 0.1f)
+        {
+            Shake(landingShakeMagnitude, landingShakeDuration);
+            wasFalling = false;
+        }
+    }
+
+    // ===== SHAKE =====
+    public void Shake(float magnitude, float duration)
+    {
+        shakeMagnitude = Mathf.Min(magnitude, maxShake);
+        shakeDuration = duration;
+        shakeTimer = duration;
+    }
+
+    private void UpdateShake(float dt)
+    {
+        if (shakeTimer <= 0f)
+        {
+            shakeOffset = Vector3.zero;
+            return;
+        }
+
+        shakeTimer -= dt;
+
+        float t = 1f - (shakeTimer / shakeDuration);
+        float damping = Mathf.Lerp(1f, 0f, t);
+
+        float currentMag = shakeMagnitude * damping;
+
+        shakeOffset = new Vector3(
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f)
+        ) * currentMag;
     }
 }

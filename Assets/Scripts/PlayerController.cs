@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 [RequireComponent(typeof(Rigidbody), typeof(Collider))]
 public class PlayerController : MonoBehaviour
@@ -28,6 +29,11 @@ public class PlayerController : MonoBehaviour
     [Header("Physics")]
     public float maxForce = 10f;
 
+    // 🔥 EVENTOS (clave para conectar sistemas)
+    public Action OnResizeSmall;
+    public Action OnResizeNormal;
+    public Action OnResizeLarge;
+
     private Rigidbody rb;
     private Collider col;
 
@@ -55,12 +61,24 @@ public class PlayerController : MonoBehaviour
     void OnEnable()
     {
         inputActions.Enable();
+
+        // Movimiento y salto
         inputActions.Player.Jump.performed += OnJump;
+
+        // 🔥 Resize
+        inputActions.Player.ResizeSmall.performed += _ => OnResizeSmall?.Invoke();
+        inputActions.Player.ResizeNormal.performed += _ => OnResizeNormal?.Invoke();
+        inputActions.Player.ResizeLarge.performed += _ => OnResizeLarge?.Invoke();
     }
 
     void OnDisable()
     {
         inputActions.Player.Jump.performed -= OnJump;
+
+        inputActions.Player.ResizeSmall.performed -= _ => OnResizeSmall?.Invoke();
+        inputActions.Player.ResizeNormal.performed -= _ => OnResizeNormal?.Invoke();
+        inputActions.Player.ResizeLarge.performed -= _ => OnResizeLarge?.Invoke();
+
         inputActions.Disable();
     }
 
@@ -81,7 +99,6 @@ public class PlayerController : MonoBehaviour
     {
         moveInput = inputActions.Player.Move.ReadValue<Vector2>();
 
-        // 🔥 CLAVE: evita velocidad extra en diagonal pero mantiene input analógico
         movementInput = Vector3.ClampMagnitude(
             new Vector3(moveInput.x, 0f, moveInput.y),
             1f
@@ -108,13 +125,9 @@ public class PlayerController : MonoBehaviour
         float gravity = baseGravity;
 
         if (rb.linearVelocity.y < 0)
-        {
             gravity *= fallMultiplier;
-        }
         else if (rb.linearVelocity.y > 0 && !inputActions.Player.Jump.IsPressed())
-        {
             gravity *= lowJumpMultiplier;
-        }
 
         rb.AddForce(Vector3.down * gravity, ForceMode.Acceleration);
     }
